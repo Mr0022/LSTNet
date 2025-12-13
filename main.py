@@ -141,6 +141,10 @@ optim = Optim.Optim(
     model.parameters(), args.optim, args.lr, args.clip,
 )
 
+# Create save directory if it doesn't exist
+import os
+os.makedirs(os.path.dirname(args.save), exist_ok=True)
+
 # At any point you can hit Ctrl + C to break out of training early.
 try:
     print('begin training');
