@@ -10,7 +10,13 @@ You can download the datasets mentioned in the paper at https://github.com/laigu
 
 We give the examples to run different datasets in ele.sh, traffic.sh, solar.sh and stoke.sh.
 
-### Environment 
+### Environment
 
-Python 2.7 and Pytorch 0.3.0
+Python 3.12+ and PyTorch 2.9+
+
+### Installation
+
+```bash
+pip install -r requirements.txt
+```
 

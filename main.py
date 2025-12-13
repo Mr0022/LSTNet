@@ -29,8 +29,8 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size):
             test = torch.cat((test, Y));
         
         scale = data.scale.expand(output.size(0), data.m)
-        total_loss += evaluateL2(output * scale, Y * scale).data[0]
-        total_loss_l1 += evaluateL1(output * scale, Y * scale).data[0]
+        total_loss += evaluateL2(output * scale, Y * scale).item()
+        total_loss_l1 += evaluateL1(output * scale, Y * scale).item()
         n_samples += (output.size(0) * data.m);
     rse = math.sqrt(total_loss / n_samples)/data.rse
     rae = (total_loss_l1/n_samples)/data.rae
@@ -57,7 +57,7 @@ def train(data, X, Y, model, criterion, optim, batch_size):
         loss = criterion(output * scale, Y * scale);
         loss.backward();
         grad_norm = optim.step();
-        total_loss += loss.data[0];
+        total_loss += loss.item();
         n_samples += (output.size(0) * data.m);
     return total_loss / n_samples
     
@@ -125,11 +125,11 @@ nParams = sum([p.nelement() for p in model.parameters()])
 print('* number of parameters: %d' % nParams)
 
 if args.L1Loss:
-    criterion = nn.L1Loss(size_average=False);
+    criterion = nn.L1Loss(reduction='sum');
 else:
-    criterion = nn.MSELoss(size_average=False);
-evaluateL2 = nn.MSELoss(size_average=False);
-evaluateL1 = nn.L1Loss(size_average=False)
+    criterion = nn.MSELoss(reduction='sum');
+evaluateL2 = nn.MSELoss(reduction='sum');
+evaluateL1 = nn.L1Loss(reduction='sum')
 if args.cuda:
     criterion = criterion.cuda()
     evaluateL1 = evaluateL1.cuda();

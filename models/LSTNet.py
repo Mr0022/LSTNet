@@ -13,7 +13,7 @@ class Model(nn.Module):
         self.hidS = args.hidSkip;
         self.Ck = args.CNN_kernel;
         self.skip = args.skip;
-        self.pt = (self.P - self.Ck)/self.skip
+        self.pt = int((self.P - self.Ck) // self.skip)
         self.hw = args.highway_window
         self.conv1 = nn.Conv2d(1, self.hidC, kernel_size = (self.Ck, self.m));
         self.GRU1 = nn.GRU(self.hidC, self.hidR);
@@ -27,9 +27,9 @@ class Model(nn.Module):
             self.highway = nn.Linear(self.hw, 1);
         self.output = None;
         if (args.output_fun == 'sigmoid'):
-            self.output = F.sigmoid;
+            self.output = torch.sigmoid;
         if (args.output_fun == 'tanh'):
-            self.output = F.tanh;
+            self.output = torch.tanh;
  
     def forward(self, x):
         batch_size = x.size(0);

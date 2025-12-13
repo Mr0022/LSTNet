@@ -1,0 +1,14 @@
+# PyTorch and related packages
+torch>=2.9.0
+torchvision>=0.20.0
+torchaudio>=2.5.0
+
+# Numerical computing
+numpy>=1.26.0,<2.0.0
+
+# Core dependencies
+argparse>=1.4.0
+
+# Development tools (optional)
+pytest>=8.0.0
+black>=24.0.0
