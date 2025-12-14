@@ -29,8 +29,8 @@ def evaluate(data, X, Y, model, evaluateL2, evaluateL1, batch_size):
             test = torch.cat((test, Y));
         
         scale = data.scale.expand(output.size(0), data.m)
-        total_loss += evaluateL2(output * scale, Y * scale).data[0]
-        total_loss_l1 += evaluateL1(output * scale, Y * scale).data[0]
+        total_loss += evaluateL2(output * scale, Y * scale).item()
+        total_loss_l1 += evaluateL1(output * scale, Y * scale).item()
         n_samples += (output.size(0) * data.m);
     rse = math.sqrt(total_loss / n_samples)/data.rse
     rae = (total_loss_l1/n_samples)/data.rae
@@ -57,7 +57,7 @@ def train(data, X, Y, model, criterion, optim, batch_size):
         loss = criterion(output * scale, Y * scale);
         loss.backward();
         grad_norm = optim.step();
-        total_loss += loss.data[0];
+        total_loss += loss.item();
         n_samples += (output.size(0) * data.m);
     return total_loss / n_samples
     
@@ -95,7 +95,7 @@ parser.add_argument('--cuda', type=str, default=True)
 parser.add_argument('--optim', type=str, default='adam')
 parser.add_argument('--lr', type=float, default=0.001)
 parser.add_argument('--horizon', type=int, default=12)
-parser.add_argument('--skip', type=float, default=24)
+parser.add_argument('--skip', type=int, default=24)
 parser.add_argument('--hidSkip', type=int, default=5)
 parser.add_argument('--L1Loss', type=bool, default=True)
 parser.add_argument('--normalize', type=int, default=2)
@@ -125,11 +125,11 @@ nParams = sum([p.nelement() for p in model.parameters()])
 print('* number of parameters: %d' % nParams)
 
 if args.L1Loss:
-    criterion = nn.L1Loss(size_average=False);
+    criterion = nn.L1Loss(reduction='sum');
 else:
-    criterion = nn.MSELoss(size_average=False);
-evaluateL2 = nn.MSELoss(size_average=False);
-evaluateL1 = nn.L1Loss(size_average=False)
+    criterion = nn.MSELoss(reduction='sum');
+evaluateL2 = nn.MSELoss(reduction='sum');
+evaluateL1 = nn.L1Loss(reduction='sum')
 if args.cuda:
     criterion = criterion.cuda()
     evaluateL1 = evaluateL1.cuda();
@@ -140,6 +140,10 @@ best_val = 10000000;
 optim = Optim.Optim(
     model.parameters(), args.optim, args.lr, args.clip,
 )
+
+# Create save directory if it doesn't exist
+import os
+os.makedirs(os.path.dirname(args.save), exist_ok=True)
 
 # At any point you can hit Ctrl + C to break out of training early.
 try:
@@ -165,6 +169,6 @@ except KeyboardInterrupt:
 
 # Load the best saved model.
 with open(args.save, 'rb') as f:
-    model = torch.load(f)
+    model = torch.load(f, weights_only=False)
 test_acc, test_rae, test_corr  = evaluate(Data, Data.test[0], Data.test[1], model, evaluateL2, evaluateL1, args.batch_size);
 print ("test rse {:5.4f} | test rae {:5.4f} | test corr {:5.4f}".format(test_acc, test_rae, test_corr))

@@ -1,6 +1,5 @@
 import torch
 import numpy as np;
-from torch.autograd import Variable
 
 
 def normal_std(x):
@@ -23,10 +22,10 @@ class Data_utility(object):
         
         self.scale = torch.from_numpy(self.scale).float();
         tmp = self.test[1] * self.scale.expand(self.test[1].size(0), self.m);
-            
+
         if self.cuda:
             self.scale = self.scale.cuda();
-        self.scale = Variable(self.scale);
+        self.scale.requires_grad = False;
         
         self.rse = normal_std(tmp);
         self.rae = torch.mean(torch.abs(tmp - torch.mean(tmp)));
@@ -84,6 +83,6 @@ class Data_utility(object):
             X = inputs[excerpt]; Y = targets[excerpt];
             if (self.cuda):
                 X = X.cuda();
-                Y = Y.cuda();  
-            yield Variable(X), Variable(Y);
+                Y = Y.cuda();
+            yield X, Y;
             start_idx += batch_size
